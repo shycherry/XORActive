@@ -1,0 +1,21 @@
+{
+  "name": "XORActive",
+  "version": "0.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "mersenne-twister": "^1.0.1",
+    "bitwise-xor": "0.0.0"
+  },
+  "devDependencies": {
+    "mocha": "^2.0.1"
+  },
+  "scripts": {
+    "test" : "mocha test"
+  }
+}
