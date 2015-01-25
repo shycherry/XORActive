@@ -24,7 +24,7 @@ describe('test creation', function(){
     connexA.setMutator(testMutator);
     connexA.encrypt('secret', function(err, result){
       assert.equal(err, null);
-      assert.equal(result.toString(), "test");
+      assert.equal(result, new Buffer([2,1]));
     });
   });
 

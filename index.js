@@ -6,6 +6,7 @@ function _nop (){};
 
 function reset(){
   this.twister = new mtwister();
+  this.flags = 0;
   this.mask = null;
   this.updateMutator();
 };
@@ -15,16 +16,31 @@ function XORActive(){
 }
 
 XORActive.prototype.isStateOK = function() {
-  return (this.mask && this.mutator && this.mask.length > this.mutator.length);
+  if(!this.mask)
+    return false;
+  if(this.mutator){
+    if(this.mask.length < this.mutator.length)
+      return false;
+  }
+  return ();
 };
 
 XORActive.prototype.setMask = function(iMask) {
-  this.mask = new Buffer(iMask);
+  this.mask = Buffer.isBuffer(iMask)? iMask : new Buffer(iMask);
 };
 
 XORActive.prototype.setMutator = function(iMutator){
-  this.mutator = new Buffer(4);
-  this.mutator.set(iMutator);
+  this.mutator = Buffer.isBuffer(iMutator)? iMutator : new Buffer(iMutator);
+};
+
+XORActive.prototype.format = function(iBuffer) {
+  var flagsBuf = new Buffer(1);
+  flagsBuf.writeInt8(this.flags, 0);
+
+  var mutatorLengthBuf = new Buffer(2);
+
+
+  return new Buffer.concat([iBuffer]);
 };
 
 XORActive.prototype.encrypt = function(iBuffer, iCb) {
@@ -41,12 +57,12 @@ XORActive.prototype.encrypt = function(iBuffer, iCb) {
     return;
   }
 
-
   var result = Buffer.concat([this.mutator, iBuffer]);
   iCb(null, result);
 };
 
 XORActive.prototype.updateMutator = function() {
+  this.prev_mutator = this.mutator;
   this.mutator = this.mutator || new Buffer(4);
   this.mutator.set(0,this.twister.random_int());
 };
