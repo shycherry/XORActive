@@ -73,3 +73,35 @@ describe('test with known mask', function(){
     });
   });  
 });
+
+describe('test basic message', function(){
+  before(function(){
+    connexA = new XORActive();
+    connexA.setMask(testMask20Bytes);
+    connexA.setSendCb(function(data, cb){
+      connexB.receive(data, function(err, data){
+        assert.equal(err, null);
+        assert.equal(data.toString(), "secret");
+      });
+      cb(null, data);
+    });
+
+    connexB = new XORActive();
+    connexB.setMask(testMask20Bytes);
+    connexB.setSendCb(function(data, cb){
+      connexA.receive(data, function(err, data){
+        assert.equal(err, null);
+      });
+      cb(null, data);
+    });
+
+  });
+
+  it('b receive expected message', function(){
+    connexA.send(testPayload, function(err, result){
+        assert.equal(err, null);
+        assert.equal(result.length, 20);
+    });
+
+  });  
+});

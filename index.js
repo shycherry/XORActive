@@ -133,6 +133,7 @@ XORActive.prototype._getUnPackedFormat = function(iBuffer) {
     iBuffer.copy(payloadBuf, 0, offset, offset+payloadSizeValue);
     offset += mutatorSizeValue;
   }
+  results['payload'] = payloadBuf;
 
   return results;
 };
@@ -186,7 +187,7 @@ XORActive.prototype._mutateMask = function(iMutator){
   this._mask.writeInt8(69,0);
 }
 
-XORActive.prototype.recieve = function(iPacket, iCb) {
+XORActive.prototype.receive = function(iPacket, iCb) {
 
   if(!Buffer.isBuffer(this._mask)){
     iCb("no mask provided");
@@ -201,7 +202,7 @@ XORActive.prototype.recieve = function(iPacket, iCb) {
 
   var unXorBuf = xor(packetBuf, this._mask);
   
-  var unpacked = _getUnPackedFormat(unXorBuf);
+  var unpacked = this._getUnPackedFormat(unXorBuf);
   if(!unpacked){
     iCb('invalid packet format');
     return;
