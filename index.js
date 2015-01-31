@@ -32,6 +32,10 @@ XORActive.prototype.setSendCb = function(iSendCb) {
   this._sendCb = iSendCb;
 };
 
+XORActive.prototype.setReceiveCb = function(iReceiveCb) {
+  this._receiveCb = iReceiveCb;
+};
+
 XORActive.prototype._getFormatedPacket = function(iNewMutator,
 iPrevMutator, iPayload, iDesiredSize) {
   var buffers = [];
@@ -96,8 +100,6 @@ XORActive.prototype._getUnPackedFormat = function(iBuffer) {
   var mutatorSizeValue = iBuffer.readInt8(offset);
   offset += 1;
   if(mutatorSizeValue > (iBuffer.length - offset)) return null;
-
-  // results['mutator_size'] = mutatorSizeValue;
   
   var mutatorBuf = null;
   if(mutatorSizeValue){
@@ -111,8 +113,6 @@ XORActive.prototype._getUnPackedFormat = function(iBuffer) {
   offset += 1;
   if(prevMutatorSizeValue > (iBuffer.length - offset)) return null;
   
-  // results['prev_mutator_size'] = prevMutatorSizeValue;
-
   var prevMutatorBuf = null;
   if(prevMutatorSizeValue){
     prevMutatorBuf = new Buffer(prevMutatorSizeValue);
@@ -124,8 +124,6 @@ XORActive.prototype._getUnPackedFormat = function(iBuffer) {
   var payloadSizeValue = iBuffer.readUInt16BE(offset);
   offset += 2;
   if(payloadSizeValue > (iBuffer.length - offset)) return null;
-
-  // results['payload_size'] = payloadSizeValue;
 
   var payloadBuf = null;
   if(payloadSizeValue){
@@ -219,6 +217,9 @@ XORActive.prototype.receive = function(iPacket, iCb) {
   this._mutateMask(unpacked['mutator']);
 
   iCb(null, unpacked['payload']);
+  
+  if(this._receiveCb)
+    this._receiveCb(null, unpacked['payload']);
 };
 
 module.exports = XORActive;

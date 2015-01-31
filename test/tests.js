@@ -77,22 +77,25 @@ describe('test with known mask', function(){
 describe('test basic communication', function(){
   before(function(){
     var sendCbA = function(data, cb){
-      // todo
+      connexB.receive(data, cb);
     };
+    var sendCbB = function(data, cb){
+      connexA.receive(data, cb);
+    };
+
     connexA = new XORActive();
     connexA.setMask(testMask20Bytes);
+    connexA.setSendCb(sendCbA);
     
     connexB = new XORActive();
     connexB.setMask(testMask20Bytes);
+    connexB.setSendCb(sendCbB);
   });
 
   it('B receive expected message', function(){
-    connexA.setSendCb(function(data, cb){
-      connexB.receive(data, function(err, data){
-        assert.equal(err, null);
-        assert.equal(data.toString(), "secretA");
-      });
-      cb(null, data);
+    connexB.setReceiveCb(function(err, data){
+      assert.equal(err, null);
+      assert.equal(data.toString(), "secretA");
     });
 
     connexA.send(new Buffer("secretA"), function(err, result){
@@ -101,18 +104,13 @@ describe('test basic communication', function(){
   });  
 
   it('A receive expected message', function(){
-    connexB.setSendCb(function(data, cb){
-      connexA.receive(data, function(err, data){
-        assert.equal(err, null);
-        assert.equal(data.toString(), "secretB");
-      });
-      cb(null, data);
+    connexA.setReceiveCb(function(err, data){
+      assert.equal(err, null);
+      assert.equal(data.toString(), "secretB");
     });
 
     connexB.send(new Buffer("secretB"), function(err, result){
         assert.equal(err, null);
     });
-  });  
-
-
+  });
 });
