@@ -208,11 +208,14 @@ XORActive.prototype.receive = function(iPacket, iCb) {
     return;
   }
 
-  if(unpacked['prev_mutator'] != this._mutator){
-    iCb('previous mutator doesnt match');
-    return;
+  if(unpacked['prev_mutator'] && this._mutator){
+    if(unpacked['prev_mutator'].inspect() != this._mutator.inspect()){
+      console.log(unpacked['prev_mutator'].inspect(),this._mutator.inspect());
+      iCb('previous mutator doesnt match');
+      return;
+    }
   }
-
+  
   this._mutateMask(unpacked['mutator']);
 
   iCb(null, unpacked['payload']);

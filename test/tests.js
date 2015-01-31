@@ -74,34 +74,45 @@ describe('test with known mask', function(){
   });  
 });
 
-describe('test basic message', function(){
+describe('test basic communication', function(){
   before(function(){
+    var sendCbA = function(data, cb){
+      // todo
+    };
     connexA = new XORActive();
     connexA.setMask(testMask20Bytes);
+    
+    connexB = new XORActive();
+    connexB.setMask(testMask20Bytes);
+  });
+
+  it('B receive expected message', function(){
     connexA.setSendCb(function(data, cb){
       connexB.receive(data, function(err, data){
         assert.equal(err, null);
-        assert.equal(data.toString(), "secret");
+        assert.equal(data.toString(), "secretA");
       });
       cb(null, data);
     });
 
-    connexB = new XORActive();
-    connexB.setMask(testMask20Bytes);
+    connexA.send(new Buffer("secretA"), function(err, result){
+        assert.equal(err, null);
+    });
+  });  
+
+  it('A receive expected message', function(){
     connexB.setSendCb(function(data, cb){
       connexA.receive(data, function(err, data){
         assert.equal(err, null);
+        assert.equal(data.toString(), "secretB");
       });
       cb(null, data);
     });
 
-  });
-
-  it('b receive expected message', function(){
-    connexA.send(testPayload, function(err, result){
+    connexB.send(new Buffer("secretB"), function(err, result){
         assert.equal(err, null);
-        assert.equal(result.length, 20);
     });
-
   });  
+
+
 });
