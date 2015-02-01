@@ -9,11 +9,18 @@ function _randomFillBuffer(ioBuffer){
   if(!Buffer.isBuffer(ioBuffer)){
     return;
   }
-  
+
   var bufferSize = ioBuffer.length;
   while(bufferSize){
     ioBuffer.writeUInt32BE(_twister.random_int(), _twister.random_int() % bufferSize, true);
     bufferSize--;
+  }
+}
+
+function _neighborKeyAddOperator(ioBuf, iParam){
+  var bufferSize = ioBuf.length;
+  for (var i = 0; i < bufferSize; i++) {
+    ioBuf[i] += ioBuf[(i+iParam)%bufferSize];
   }
 }
 
@@ -100,7 +107,7 @@ XORActive.prototype._getUnPackedFormat = function(iBuffer) {
   var mutatorSizeValue = iBuffer.readInt8(offset);
   offset += 1;
   if(mutatorSizeValue > (iBuffer.length - offset)) return null;
-  
+
   var mutatorBuf = null;
   if(mutatorSizeValue){
     mutatorBuf = new Buffer(mutatorSizeValue);
@@ -112,7 +119,7 @@ XORActive.prototype._getUnPackedFormat = function(iBuffer) {
   var prevMutatorSizeValue = iBuffer.readInt8(offset);
   offset += 1;
   if(prevMutatorSizeValue > (iBuffer.length - offset)) return null;
-  
+
   var prevMutatorBuf = null;
   if(prevMutatorSizeValue){
     prevMutatorBuf = new Buffer(prevMutatorSizeValue);
@@ -138,7 +145,7 @@ XORActive.prototype._getUnPackedFormat = function(iBuffer) {
 
 XORActive.prototype.regenMutator = function() {
   var mutatorBuf = (this._mutator)? new Buffer(this._mutator.length) : new Buffer(4);
-  
+
   _randomFillBuffer(mutatorBuf);
   return mutatorBuf;
 };
@@ -150,7 +157,7 @@ XORActive.prototype.send = function(iPayload, iCb) {
     iCb("no mask provided");
     return;
   }
-  
+
   if(!this._sendCb){
     iCb("no sendCb provided");
     return;
@@ -182,7 +189,9 @@ XORActive.prototype.send = function(iPayload, iCb) {
 
 XORActive.prototype._mutateMask = function(iMutator){
   this._mutator = iMutator;
-  this._mask.writeInt8(69,0);
+  for (var i = 0; i < iMutator.length; i++) {
+    _neighborKeyAddOperator(this._mask, iMutator[i]);
+  }
 }
 
 XORActive.prototype.receive = function(iPacket, iCb) {
@@ -191,7 +200,7 @@ XORActive.prototype.receive = function(iPacket, iCb) {
     iCb("no mask provided");
     return;
   }
-  
+
   var packetBuf = Buffer.isBuffer(iPacket)? iPacket : new Buffer(iPacket);
   if(packetBuf.length != this._mask.length){
     iCb("bad packet size");
@@ -199,7 +208,7 @@ XORActive.prototype.receive = function(iPacket, iCb) {
   }
 
   var unXorBuf = xor(packetBuf, this._mask);
-  
+
   var unpacked = this._getUnPackedFormat(unXorBuf);
   if(!unpacked){
     iCb('invalid packet format');
@@ -213,11 +222,11 @@ XORActive.prototype.receive = function(iPacket, iCb) {
       return;
     }
   }
-  
+
   this._mutateMask(unpacked['mutator']);
 
   iCb(null, unpacked['payload']);
-  
+
   if(this._receiveCb)
     this._receiveCb(null, unpacked['payload']);
 };

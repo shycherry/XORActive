@@ -71,7 +71,7 @@ describe('test with known mask', function(){
         assert.equal(err, null);
         assert.equal(result.length, 20);
     });
-  });  
+  });
 });
 
 describe('test basic communication', function(){
@@ -86,7 +86,7 @@ describe('test basic communication', function(){
     connexA = new XORActive();
     connexA.setMask(testMask20Bytes);
     connexA.setSendCb(sendCbA);
-    
+
     connexB = new XORActive();
     connexB.setMask(testMask20Bytes);
     connexB.setSendCb(sendCbB);
@@ -101,7 +101,7 @@ describe('test basic communication', function(){
     connexA.send(new Buffer("secretA"), function(err, result){
         assert.equal(err, null);
     });
-  });  
+  });
 
   it('A receive expected message', function(){
     connexA.setReceiveCb(function(err, data){
